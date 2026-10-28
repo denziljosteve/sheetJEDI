@@ -191,3 +191,47 @@ Chromium tab:
    match longest pattern first (test-infra bug, would have masked failures).
 5. Test assertion issues (asymmetric matcher in `toHaveValue`, case-sensitive
    `toContain`, missing optional `code` field in fixture) â€” fixed.
+
+---
+
+## Session 2 addendum — e2e, audit, git (2026-10-28)
+
+### Playwright e2e (first run + fix)
+- First run: **3 passed, 1 failed.** Failure was in the *test*, not the app:
+  the consent assertion parsed the multipart body as `consent=true`, but
+  multipart parts are `Content-Disposition: form-data; name="consent"` +
+  blank line + `true`. Fixed the matcher to
+  `/name="consent"\r?\n\r?\ntrue/`.
+- Re-run: **4/4 passed** (3.1s). Re-verified again after the audit upgrade:
+  **4/4 passed**. Coverage: mocked happy-path generation + payload contract,
+  structured error with request ID, analyzer consent gating, dark-theme
+  persistence across reload. Entire `/api/v1` surface mocked in-browser —
+  no backend, no keys, no paid calls.
+
+### npm audit
+- Initial: **2 moderate** (vitest / @vitest/mocker advisories, dev-only).
+  `npm audit fix` upgraded 8 packages ? **0 vulnerabilities**.
+- Post-upgrade gates re-run: 21/21 Vitest, typecheck clean, build OK,
+  e2e 4/4 — no regressions.
+
+### Final gate matrix (post-everything)
+| Gate | Result |
+|---|---|
+| `pytest tests -q` | 112 passed, 5 skipped |
+| `ruff check app tests alembic` | clean |
+| `ruff format --check app tests alembic` | clean (49 files) |
+| `mypy app tests --ignore-missing-imports` | clean (48 files) |
+| `npm run typecheck` | clean (strict) |
+| `npm test` | 21 passed |
+| `npm run lint` | exit 0 (4 advisory warnings) |
+| `npm run build` | OK (511 kB JS / 156 kB gzip) |
+| `npx playwright test` | 4 passed |
+| `npm audit` | 0 vulnerabilities |
+
+### Git
+- `git init` + author (Denzil Josteve Fernandes / denziljosteve@gmail.com).
+- `.gitignore` verified with `git check-ignore` (backend/.env, .venv/,
+  backend/data/, frontend/dist/ all ignored).
+- 4 commits on `master`: scaffolding ? backend ? frontend (incl. e2e) ? docs.
+- Secret scan over tracked files: only fake fixtures used by redaction tests.
+- Working tree clean after commits.

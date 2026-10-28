@@ -43,9 +43,11 @@ Phase 7 — Verification & documentation (Phases 1–6 complete and verified).
       git-ignored (verified with `git check-ignore`), consent gating, temp-file deletion,
       no auto-execution of generated code, destructive-pattern warnings
 
-## In progress
-- [ ] Git: repository initialized + author configured + `.gitignore` verified;
-      initial commit pending (no commits yet at time of writing).
+## Completed
+- [x] Git: repository initialized + author configured + `.gitignore` verified;
+      4 commits on `master` (scaffolding → backend → frontend incl. e2e → docs),
+      working tree clean, secret scan over tracked files shows only redaction
+      test fixtures.
 
 ## Blocked / pending verification
 - **Live provider success paths:** no API keys available in this environment. Only the
@@ -56,8 +58,9 @@ Phase 7 — Verification & documentation (Phases 1–6 complete and verified).
   OpenAI-compatible protocol, connection inherently untestable here.
 - **Docker / systemd / nginx / Postgres:** not installed/configured in this environment;
   snippets provided but marked ⚠️ unverified everywhere they appear.
-- **@playwright/test audit notice:** npm reported a low-severity advisory chain during
-  install — `npm audit` to be run and reported honestly.
+- ~~**@playwright/test audit notice:** npm reported a low-severity advisory chain~~
+  — resolved: `npm audit fix` upgraded 8 packages → **0 vulnerabilities**;
+  gates re-run clean afterwards (21 unit + 4 e2e + typecheck + build).
 
 ## Test & build status
 | Check | Command | Status |
